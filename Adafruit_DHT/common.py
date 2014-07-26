@@ -20,9 +20,6 @@
 # SOFTWARE.
 import time
 
-import platform_detect
-
-
 # Define error constants.
 DHT_SUCCESS        =  0
 DHT_ERROR_TIMEOUT  = -1
@@ -40,15 +37,8 @@ SENSORS = [DHT11, DHT22, AM2302]
 
 def get_platform():
 	"""Return a DHT platform interface for the currently detected platform."""
-	plat = platform_detect.platform_detect()
-	if plat == platform_detect.RASPBERRY_PI:
-		import Raspberry_Pi
-		return Raspberry_Pi
-	elif plat == platform_detect.BEAGLEBONE_BLACK:
-		import Beaglebone_Black
-		return Beaglebone_Black
-	else:
-		raise RuntimeError('Unknown platform.')
+	from . import Beaglebone_Black
+	return Beaglebone_Black
 
 def read(sensor, pin, platform=None):
 	"""Read DHT sensor of specified sensor type (DHT11, DHT22, or AM2302) on 

@@ -18,32 +18,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#include <Python.h>
+#ifndef BBB_DHT_READ_H
+#define BBB_DHT_READ_H
 
-#include "Beaglebone_Black/bbb_dht_read.h"
+#include "common_dht_read.h"
 
-// Wrap calling dht_read function and expose it as a DHT.read Python module & function.
-static PyObject* Beaglebone_Black_Driver_read(PyObject *self, PyObject *args)
-{
-	// Parse sensor and pin integer arguments.
-    int sensor, base, number;
-    if (!PyArg_ParseTuple(args, "iii", &sensor, &base, &number)) {
-        return NULL;
-    }
-    // Call dht_read and return result code, humidity, and temperature.
-    float humidity = 0, temperature = 0;
-    int result = bbb_dht_read(sensor, base, number, &humidity, &temperature);
-    return Py_BuildValue("iff", result, humidity, temperature);
-}
+// Read DHT sensor connected to GPIO bin GPIO<base>_<number>, for example P8_11 is GPIO1_13 with
+// base = 1 and number = 13.  Humidity and temperature will be returned in the provided parameters.
+// If a successfull reading could be made a value of 0 (DHT_SUCCESS) will be returned.  If there
+// was an error reading the sensor a negative value will be returned.  Some errors can be ignored
+// and retried, specifically DHT_ERROR_TIMEOUT or DHT_ERROR_CHECKSUM.
+int bbb_dht_read(int type, int gpio_base, int gpio_number, float* humidity, float* temperature);
 
-// Boilerplate python module method list and initialization functions below.
-
-static PyMethodDef module_methods[] = {
-    {"read", Beaglebone_Black_Driver_read, METH_VARARGS, "Read DHT sensor value on a Beaglebone Black."},
-    {NULL, NULL, 0, NULL}
-};
-
-PyMODINIT_FUNC initBeaglebone_Black_Driver(void)
-{
-    Py_InitModule("Beaglebone_Black_Driver", module_methods);
-}
+#endif

@@ -20,30 +20,38 @@
 // SOFTWARE.
 #include <Python.h>
 
-#include "Test/test_dht_read.h"
+#include "bbb_dht_read.h"
 
 // Wrap calling dht_read function and expose it as a DHT.read Python module & function.
-static PyObject* Test_Driver_read(PyObject *self, PyObject *args)
+static PyObject* Beaglebone_Black_Driver_read(PyObject *self, PyObject *args)
 {
 	// Parse sensor and pin integer arguments.
-    int sensor, pin;
-    if (!PyArg_ParseTuple(args, "ii", &sensor, &pin)) {
+    int sensor, base, number;
+    if (!PyArg_ParseTuple(args, "iii", &sensor, &base, &number)) {
         return NULL;
     }
     // Call dht_read and return result code, humidity, and temperature.
     float humidity = 0, temperature = 0;
-    int result = test_dht_read(sensor, pin, &humidity, &temperature);
+    int result = bbb_dht_read(sensor, base, number, &humidity, &temperature);
     return Py_BuildValue("iff", result, humidity, temperature);
 }
 
 // Boilerplate python module method list and initialization functions below.
 
 static PyMethodDef module_methods[] = {
-    {"read", Test_Driver_read, METH_VARARGS, "Mock DHT read function."},
+    {"read", Beaglebone_Black_Driver_read, METH_VARARGS, "Read DHT sensor value on a Beaglebone Black."},
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC initTest_Driver(void)
+static struct PyModuleDef bbbmodule = {
+    PyModuleDef_HEAD_INIT,
+    "Beaglebone_Black_Driver",
+    NULL,
+    -1,
+    module_methods
+};
+
+PyMODINIT_FUNC PyInit_Beaglebone_Black_Driver(void)
 {
-    Py_InitModule("Test_Driver", module_methods);
+    return PyModule_Create(&bbbmodule);
 }

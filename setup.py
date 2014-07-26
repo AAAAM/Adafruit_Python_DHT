@@ -1,55 +1,55 @@
-from ez_setup import use_setuptools
-use_setuptools()
+#!/usr/bin/env python3
+# Copyright ou © ou Copr. Pierre-Marie Chiaroni, 01 Juillet 2014.
+# 
+# pierre-marie.chiaroni@ens.fr
+# 
+# Ce logiciel est un programme informatique servant à mesurer les sorties 
+# de capteurs et à les stocker dans une base de donnée. 
+# 
+# Ce logiciel est régi par la licence CeCILL soumise au droit français et
+# respectant les principes de diffusion des logiciels libres. Vous pouvez
+# utiliser, modifier et/ou redistribuer ce programme sous les conditions
+# de la licence CeCILL telle que diffusée par le CEA, le CNRS et l'INRIA 
+# sur le site "http://www.cecill.info".
+# 
+# En contrepartie de l'accessibilité au code source et des droits de copie,
+# de modification et de redistribution accordés par cette licence, il n'est
+# offert aux utilisateurs qu'une garantie limitée.  Pour les mêmes raisons,
+# seule une responsabilité restreinte pèse sur l'auteur du programme,  le
+# titulaire des droits patrimoniaux et les concédants successifs.
+# 
+# A cet égard  l'attention de l'utilisateur est attirée sur les risques
+# associés au chargement,  à l'utilisation,  à la modification et/ou au
+# développement et à la reproduction du logiciel par l'utilisateur étant 
+# donné sa spécificité de logiciel libre, qui peut le rendre complexe à 
+# manipuler et qui le réserve donc à des développeurs et des professionnels
+# avertis possédant  des  connaissances  informatiques approfondies.  Les
+# utilisateurs sont donc invités à charger  et  tester  l'adéquation  du
+# logiciel à leurs besoins dans des conditions permettant d'assurer la
+# sécurité de leurs systèmes et ou de leurs données et, plus généralement, 
+# à l'utiliser et l'exploiter dans les mêmes conditions de sécurité. 
+# 
+# Le fait que vous puissiez accéder à cet en-tête signifie que vous avez 
+# pris connaissance de la licence CeCILL, et que vous en avez accepté les
+# termes.
+""""""
 from setuptools import setup, find_packages, Extension
-import sys
 
-import Adafruit_DHT.platform_detect as platform_detect
+moduleDHT = Extension("Adafruit_DHT.Beaglebone_Black_Driver",
+                      sources = ["ext_dht/Beaglebone_Black_Driver.c",
+                                 "ext_dht/common_dht_read.c",
+                                 "ext_dht/bbb_dht_read.c",
+                                 "ext_dht/bbb_mmio.c"],
+                      libraries = ['rt'],
+                      extra_compile_args = ['-std=gnu99'])
 
+setup(name = "Adafruit_DHT",
+      version = "1.0.0",
+      author = "Tony DiCola",
+      author_email = "tdicola@adafruit.com",
+      description = "Library to get readings from the DHT11, DHT22, and AM2302 humidity and temperature sensors on a Beaglebone Black.",
+      license = "MIT",
+      url = "https://github.com/AAAAM/Adafruit_Python_DHT",
+      packages = find_packages(),
+      ext_modules = [moduleDHT])
 
-# Check if an explicit platform was chosen with a command line parameter.
-# Kind of hacky to manipulate the argument list before calling setup, but it's
-# the best simple option for adding optional config to the setup.
-platform = platform_detect.UNKNOWN
-if '--force-pi' in sys.argv:
-	platform = platform_detect.RASPBERRY_PI
-	sys.argv.remove('--force-pi')
-elif '--force-bbb' in sys.argv:
-	platform = platform_detect.BEAGLEBONE_BLACK
-	sys.argv.remove('--force-bbb')
-elif '--force-test' in sys.argv:
-	platform = 'TEST'
-	sys.argv.remove('--force-test')
-else:
-	# No explicit platform chosen, detect the current platform.
-	platform = platform_detect.platform_detect()
-
-# Pick the right extension to compile based on the platform.
-extensions = []
-if platform == platform_detect.RASPBERRY_PI:
-	extensions.append(Extension("Adafruit_DHT.Raspberry_Pi_Driver", 
-								["source/_Raspberry_Pi_Driver.c", "source/common_dht_read.c", "source/Raspberry_Pi/pi_dht_read.c", "source/Raspberry_Pi/pi_mmio.c"], 
-								libraries=['rt'],
-								extra_compile_args=['-std=gnu99']))
-elif platform == platform_detect.BEAGLEBONE_BLACK:
-	extensions.append(Extension("Adafruit_DHT.Beaglebone_Black_Driver",
-								["source/_Beaglebone_Black_Driver.c", "source/common_dht_read.c", "source/Beaglebone_Black/bbb_dht_read.c", "source/Beaglebone_Black/bbb_mmio.c"],
-								libraries=['rt'],
-								extra_compile_args=['-std=gnu99']))
-elif platform == 'TEST':
-	extensions.append(Extension("Adafruit_DHT.Test_Driver",
-								["source/_Test_Driver.c", "source/Test/test_dht_read.c"],
-								extra_compile_args=['-std=gnu99']))
-else:
-	print 'Could not detect if running on the Raspberry Pi or Beaglebone Black.  If this failure is unexpected, you can run again with --force-pi or --force-bbb parameter to force using the Raspberry Pi or Beaglebone Black respectively.'
-	sys.exit(1)
-
-# Call setuptools setup function to install package.
-setup(name              = 'Adafruit_DHT',
-	  version           = '1.0.0',
-	  author            = 'Tony DiCola',
-	  author_email      = 'tdicola@adafruit.com',
-	  description       = 'Library to get readings from the DHT11, DHT22, and AM2302 humidity and temperature sensors on a Raspberry Pi or Beaglebone Black.',
-	  license           = 'MIT',
-	  url               = 'https://github.com/adafruit/Adafruit_Python_DHT/',
-	  packages          = find_packages(),
-	  ext_modules       = extensions)
